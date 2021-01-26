@@ -50,18 +50,25 @@
 
 ;QUESTION 3
 ;todo: documentation
-(defun mix_helper (L1 L2 AC)
+(defun remove-duplicate (X)
     (cond
-        ((null L1) (append AC L2))
-        ((null L2) (append AC L1))
-        (t (append
-                (cons (car L1) (cons(car L2) nil))
-                (mix_helper (cdr L1) (cdr L2) AC)
-            )
-        )
+        ((null X) nil)
+        ((null (cdr X)) X)
+        ((xmember (car X) (cdr X)) (remove-duplicate (cdr X)))
+        (t (cons (car X) (remove-duplicate (cdr X))))
     )
 )
 
+;QUESTION 4
+;todo: documentation
 (defun mix (L1 L2)
-    (mix_helper L1 L2 nil)
+    (cond
+        ((null L1) L2)
+        ((null L2) L1)
+        (t (append
+                (cons (car L1) (cons(car L2) nil))
+                (mix (cdr L1) (cdr L2))
+            )
+        )
+    )
 )
