@@ -72,3 +72,17 @@
         )
     )
 )
+
+;QUESTION 5
+;todo: documentation
+(defun gen-subsets (L AC)
+    (cond
+        ((or (null (car L)) (null L)) AC)
+        ((null (cdr L)) (cons L AC))
+        (t (cons L AC))
+    )
+)
+
+(defun allsubsets (L)
+    (gen-subsets L (cons nil nil))
+)
