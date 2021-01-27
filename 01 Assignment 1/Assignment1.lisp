@@ -188,3 +188,63 @@
     (remove-duplicate (reached-helper x L nil (cons x nil)))
 )
 ; (reached 'google '( (google shopify) (google aircanada) (amazon aircanada)))
+
+
+(defun linkers-helper (x L AC)
+    (if (null L)
+        AC
+        (if (and (not (eq x (caar L))) (eq x (cadar L)))
+            (linkers-helper x (cdr L) (cons (caar L) AC))
+            (linkers-helper x (cdr L) AC)
+        )
+    )
+)
+
+(defun linkers (x L)
+    (remove-duplicate (linkers-helper x L nil))
+)
+;; (linkers 'aircanada '( (google shopify) (google aircanada) (amazon aircanada) (google aircanada)))
+
+(defun count-elements (L)
+    (if (null L)
+        0
+        (+ 1 (count-elements (cdr L)))
+    )
+)
+
+(defun rank-individually (x L)
+    (cons x (cons (count-elements (linkers x L)) nil))
+)
+;; (rank-individually 'google '( (google shopify) (google aircanada) (amazon aircanada) (aircanada delta) (google google) ))
+;; (rank-individually 'shopify '( (google shopify) (google aircanada) (amazon aircanada) (aircanada delta) (google google) ))
+;; (rank-individually 'amazon '( (google shopify) (google aircanada) (amazon aircanada) (aircanada delta) (google google) ))
+;; (rank-individually 'aircanada '( (google shopify) (google aircanada) (amazon aircanada) (aircanada delta) (google google) ))
+;; (rank-individually 'delta '( (google shopify) (google aircanada) (amazon aircanada) (aircanada delta) (google google) ))
+
+(defun rank-helper (S L)
+    (if (null S)
+        nil
+        (cons (rank-individually (car S) L) (rank-helper (cdr S) L))
+    )
+)
+
+(defun rank-sorter (L)
+    (sort L 'rank-greater-than)
+)
+
+(defun rank-greater-than (L1 L2)
+    (> (cadr L1) (cadr L2))
+)
+
+(defun rank-flattener (L)
+    (if (null L)
+        nil
+        (cons (caar L) (rank-flattener (cdr L)))
+    )
+)
+;; (rank-flattener '((a 0) (b 2) (c 3)))
+
+(defun rank (S L)
+    (rank-flattener (rank-sorter (rank-helper S L)))
+)
+;; (rank '(google spotify aircanada ualberta delta) '( (google shopify) (google aircanada) (amazon aircanada) (aircanada delta) (google google) ))
