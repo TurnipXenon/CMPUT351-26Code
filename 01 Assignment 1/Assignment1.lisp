@@ -75,14 +75,57 @@
 
 ;QUESTION 5
 ;todo: documentation
-(defun gen-subsets (L AC)
-    (cond
-        ((or (null (car L)) (null L)) AC)
-        ((null (cdr L)) (cons L AC))
-        (t (cons L AC))
+(defun multi-append (E S)
+    (cond ((null S) (cons (cons E nil) nil))
+        ((null (car S)) (multi-append E (cdr S)))
+        (t (cons (cons E (car S))
+            (multi-append E (cdr S))))
+    )
+)
+
+(defun set-equal (X Y)
+    t
+)
+
+(defun set-member (X Y)
+    (if (or (null Y) (atom Y))
+        nil
+        (or (or (set-equal X (car Y))
+                (set-member X (car Y))
+            )
+            (set-member X (cdr Y))
+        )
+    )
+)
+
+(defun set-cleanup (X)
+    X
+    ;; (cond
+    ;;     ((null X) nil)
+    ;;     ((null (cdr X)) X)
+    ;;     ((set-member (car X) (cdr X)) (set-cleanup (cdr X)))
+    ;;     (t (cons (car X) (set-cleanup (cdr X))))
+    ;; )
+)
+
+(defun set-union (L R)
+    (remove-duplicate (append L R))
+)
+
+(defun gen-subsets (L E R AC)
+    (if
+        (null E)
+        nil
+        (set-union AC (set-union
+            (gen-subsets (cdr L) (car L) (cons E R) AC)
+            (let ((P (allsubsets (append L R)))) (set-union
+                P
+                (multi-append E P)
+            ))
+        ))
     )
 )
 
 (defun allsubsets (L)
-    (gen-subsets L (cons nil nil))
+    (gen-subsets (cdr L) (car L) nil (cons nil nil))
 )
