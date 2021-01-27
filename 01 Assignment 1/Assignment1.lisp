@@ -129,3 +129,26 @@
 (defun allsubsets (L)
     (gen-subsets (cdr L) (car L) nil (cons nil nil))
 )
+
+;QUESTION 6
+;todo: documentation
+;graph: ()
+;strategy: get all websites
+;check if reachable
+(defun reachable (from to L visited DC)
+    (cond
+        
+        (t nil)
+    )
+)
+
+(defun reached-helper (x L DC)
+    (cond ((null DC) nil)
+        ((reachable x (cadar DC) L) (cons (cadar DC) (reached-helper x L (cdr DC))))
+        (t (reached-helper x L (cdr DC))))
+)
+
+(defun reached (x L)
+    (remove-duplicate (reached-helper x L L))
+)
+; (reached 'google '( (google shopify) (google aircanada) (amazon aircanada)))
