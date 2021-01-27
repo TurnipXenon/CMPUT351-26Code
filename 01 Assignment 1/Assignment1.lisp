@@ -135,20 +135,56 @@
 ;graph: ()
 ;strategy: get all websites
 ;check if reachable
-(defun reachable (from to L visited DC)
-    (cond
-        
-        (t nil)
+
+;assume ((x y)) structure
+(defun neighbors-helper (x L AC)
+    (if (null L)
+        AC
+        (if (eq x (caar L))
+            (neighbors-helper x (cdr L) (cons (cadar L) AC))
+            (neighbors-helper x (cdr L) AC)
+        )
     )
 )
 
-(defun reached-helper (x L DC)
-    (cond ((null DC) nil)
-        ((reachable x (cadar DC) L) (cons (cadar DC) (reached-helper x L (cdr DC))))
-        (t (reached-helper x L (cdr DC))))
+(defun neighbors (x L)
+    (neighbors-helper x L nil)
+)
+;(neighbors 'google '( (google shopify) (google aircanada) (amazon aircanada)))
+;(neighbors 'google '( (google shopify) (google aircanada) (amazon aircanada) (aircanada delta) (google google) )) 
+;(neighbors 'google '( (google shopify) (shopify amazon) (amazon indigo)  ))
+
+(defun node-union (L R)
+    (append L R)
+)
+
+(defun node-filter-helper (L F AC)
+    (if (null L)
+        AC
+        (if (xmember (car L) F)
+            (node-filter-helper (cdr L) F AC)
+            (node-filter-helper (cdr L) F (cons (car L) AC))
+        )
+    )
+)
+
+(defun node-filter (L F)
+    (node-filter-helper L F nil)
+)
+
+(defun reached-helper (x L V Q)
+    (if (or (null Q) nil)
+        V
+        ; get all neighbors
+        (reached-helper (car Q)
+            L
+            (cons (car Q) V)
+            (node-filter (cons (car Q) (neighbors x L)) V)
+        )
+    )
 )
 
 (defun reached (x L)
-    (remove-duplicate (reached-helper x L L))
+    (remove-duplicate (reached-helper x L nil (cons x nil)))
 )
 ; (reached 'google '( (google shopify) (google aircanada) (amazon aircanada)))
