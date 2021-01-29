@@ -1,71 +1,119 @@
-;QUESTION 1
-;todo: documentation
+#| QUESTION 1
+
+The function xmember returns T if argument X is a member of the argument list Y. Otherwise, 
+it's NIL. Both the argument X and the list Y may be NIL or lists containing NIL.
+
+Test cases:
+> (xmember '1 '(1)) => T
+> (xmember '1 '( (1) 2 3)) => NIL
+> (xmember '(1) '((1) 2 3)) => T
+> (xmember nil nil) => NIL
+> (xmember nil '(nil)) => T
+> (xmember nil '((nil))) => NIL
+> (xmember '(nil) '(1 2 3 (nil))) => T
+> (xmember '(nil) '(nil)) => NIL
+
+|#
+
+#| QUESTION 1 function xmember |#
 (defun xmember (X Y)
-    (if (or (null Y) (atom Y))
-        nil
-        (or (or (equal X (car Y))
-                (xmember X (car Y))
-            )
-            (xmember X (cdr Y))
-        )
+    (cond 
+        ((or (null Y) (atom Y)) nil)
+        ((equal X (car Y)) t)
+        (t (xmember X (cdr Y)))
     )
 )
 
-;; (xmember '1 '(1))
-;; T
-;; >(xmember '1 '( (1) 2 3))
-;; NIL
-;; >(xmember '(1) '((1) 2 3))
-;; T
-;; (xmember nil nil)
-;; NIL
-;; (xmember nil '(nil))
-;; T
-;; (xmember nil '((nil)))
-;; NIL
-;; (xmember '(nil) '(1 2 3 (nil)))
-;; T
-(xmember '(nil) '(nil))
 
-;QUESTION 2
-;todo: documentation
+
+
+#| QUESTION 2
+
+The function flatten returns a list of atoms with the property that all the atoms
+appearing in the argument list X also appear.
+This function assumes that neither NIL and () will not appear in the given list X.
+
+Test cases:
+> (flatten '(a (b c) d)) => (a b c d)
+> (flatten '((((a))))) => (a)
+> (flatten '(a (b c) (d ((e)) f))) => (a b c d e f)
+
+|#
+
+#| QUESTION 2 function flatten |#
 (defun flatten (X)
     (cond
         ((null X) nil)
-        ((atom (car X)) 
-                (cons (car X)
-                    (flatten (cdr X))))
-        (t
-            (append
-                (flatten (car X))
-                (flatten (cdr X))
-            )
+        (
+            (atom (car X)) 
+            (cons (car X) (flatten (cdr X)))
+        )
+        (
+            t 
+            (append (flatten (car X)) (flatten (cdr X)))
         )
     )
 )
 
-;; (flatten '(a (b c) d))
-;; (flatten '((((a)))))
-;; (flatten '(a (b c) (d ((e)) f)))
 
-;QUESTION 3
-;todo: documentation
+
+
+#| QUESTION 3
+
+The function remove-duplicate takes the list argument X as a list of atoms and returns 
+a list with the same sequence of atoms with duplicate atoms removed.
+The function evaluates whether the elements are equal using lisp's equal function.
+That is, two elements are equal if both elements are structurally similar (isomorphic).
+
+Test cases:
+> (remove-duplicate '(a b c a d b)) => (c a d b)
+> (remove-duplicate '((b a) b c (a b) d b)) => ((b a) c (a b) d b)
+> (remove-duplicate '((b a) b c (b a) d b)) => (c (b a) d b)
+
+|#
+
+#| QUESTION 3 function remove-duplicate |#
 (defun remove-duplicate (X)
     (cond
         ((null X) nil)
         ((null (cdr X)) X)
-        ((xmember (car X) (cdr X)) (remove-duplicate (cdr X)))
-        (t (cons (car X) (remove-duplicate (cdr X))))
+        (
+            (xmember (car X) (cdr X)) 
+            (remove-duplicate (cdr X))
+        )
+        (
+            t 
+            (cons (car X) (remove-duplicate (cdr X)))
+        )
     )
 )
 
-;QUESTION 4
-;todo: documentation
+
+
+
+#| QUESTION 4
+
+The function mix returns a list that mixes the elements of the list arguments L1 and L2.
+It does so by choosing elements from L1 and L2 alternatingly. If one list is shorter than
+the other, then append all remaining elements from the longer list at the end.
+
+Test cases:
+> (mix '(a b c) '(d e f)) => (a b c d e f)
+> (mix '(1 2 3) '(a)) => (1 a 2 3)
+> (mix '((a) (b c)) '(d e f g h)) => ((a) d (b c) e f g h)
+> (mix '(1 2 3) nil) => (1 2 3)
+> (mix '(1 2 3) '(nil)) => (1 nil 2 3)
+
+|#
+
+#| QUESTION 4 function mix |#
 (defun mix (L1 L2)
     (cond
         ((null L1) L2)
         ((null L2) L1)
-        (t (append
+        (
+            t 
+            (append
                 (cons (car L1) (cons(car L2) nil))
                 (mix (cdr L1) (cdr L2))
             )
@@ -73,8 +121,20 @@
     )
 )
 
-;QUESTION 5
-;todo: documentation
+
+
+
+#| QUESTION 5
+
+The function allsubsets returns a list of all subsets of L. No subsets are repeated.
+
+Test cases:
+> (allsubsets nil) => (nil)
+> (allsubsets '(a)) => (nil (a)) 
+> (allsubsets '(a b)) => (nil (a) (b) (a b))
+
+|#
+
 (defun multi-append (E S)
     (cond ((null S) (cons (cons E nil) nil))
         ((null (car S)) (multi-append E (cdr S)))
@@ -83,42 +143,46 @@
     )
 )
 
-(defun set-equal (X Y)
-    t
-)
 
-(defun set-member (X Y)
-    (if (or (null Y) (atom Y))
-        nil
-        (or (or (set-equal X (car Y))
-                (set-member X (car Y))
-            )
-            (set-member X (cdr Y))
-        )
+
+(defun xset-member (X L)
+    (cond
+        ((null L) nil)
+        ((equal X (car L)) t)
+        (t (xset-member X (cdr L)))
     )
 )
 
-(defun set-cleanup (X)
-    X
-    ;; (cond
-    ;;     ((null X) nil)
-    ;;     ((null (cdr X)) X)
-    ;;     ((set-member (car X) (cdr X)) (set-cleanup (cdr X)))
-    ;;     (t (cons (car X) (set-cleanup (cdr X))))
-    ;; )
+(defun xset-subset (X L)
+    (cond
+        ((null X) t)
+        ((xset-member (car X) L) (xset-subset (cdr X) L))
+        (t nil)
+    )
 )
 
-(defun set-union (L R)
-    (remove-duplicate (append L R))
+(defun xset-equal (X Y)
+    (if (and (xset-subset X Y) (xset-subset Y X))
+        t
+        nil
+    )
+)
+
+(defun set-contains (X L)
+    (cond
+        ((null L) nil)
+        ((xset-equal X (car L)) t)
+        (t (set-contains X (cdr L)))
+    )
 )
 
 (defun gen-subsets (L E R AC)
     (if
         (null E)
         nil
-        (set-union AC (set-union
+        (append AC (append
             (gen-subsets (cdr L) (car L) (cons E R) AC)
-            (let ((P (allsubsets (append L R)))) (set-union
+            (let ((P (allsubsets (append L R)))) (append
                 P
                 (multi-append E P)
             ))
@@ -126,10 +190,58 @@
     )
 )
 
-(defun allsubsets (L)
-    (gen-subsets (cdr L) (car L) nil (cons nil nil))
+
+#| Helper function set-cleanup
+
+The function set-cleanup removes duplicate subsets in list X and accumulates non-duplicated
+elements int list argument AC. Subsets are considered to be duplicates or equal 
+if they have the same elements, and the ordering in them do not matter. 
+When initially using set-cleanup, AC should be NIL.
+All the elements in X are lists.
+
+Test cases:
+(set-cleanup '(nil) nil) => (NIL)
+(set-cleanup '((A) (A)) nil) => ((A))
+(set-cleanup '((B A) (A B)) nil) => ((A B))
+(set-cleanup '((B A C) (A B C) (C A B)) nil) => ((C A B))
+
+|#
+
+(defun set-cleanup (X AC)
+    (if (null X)
+        nil
+        (if (set-contains (car X) (cdr X))
+            (set-cleanup (cdr X) AC)
+            (cons (car X) (set-cleanup (cdr X) AC))
+        )
+    )
 )
 
+
+#| QUESTION 5 function allsubsets |#
+(defun allsubsets (L)
+    (set-cleanup (gen-subsets (cdr L) (car L) nil (cons nil nil)) nil)
+)
+
+
+
+
+#| QUESTION 6
+
+The function mix returns a list that mixes the elements of the list arguments L1 and L2.
+It does so by choosing elements from L1 and L2 alternatingly. If one list is shorter than
+the other, then append all remaining elements from the longer list at the end.
+
+Test cases:
+> (mix '(a b c) '(d e f)) => (a b c d e f)
+> (mix '(1 2 3) '(a)) => (1 a 2 3)
+> (mix '((a) (b c)) '(d e f g h)) => ((a) d (b c) e f g h)
+> (mix '(1 2 3) nil) => (1 2 3)
+> (mix '(1 2 3) '(nil)) => (1 nil 2 3)
+
+|#
+
+#| QUESTION 6 function mix |#
 ;QUESTION 6
 ;todo: documentation
 ;graph: ()
