@@ -131,7 +131,12 @@ The function allsubsets returns a list of all subsets of L. No subsets are repea
 Test cases:
 > (allsubsets nil) => (nil)
 > (allsubsets '(a)) => (nil (a)) 
+<<<<<<< HEAD
+> (allsubsets '(a b)) => (nil (b) (a b) (a))
+> (allsubsets '(a b c)) => (nil (c) (b c) (b) (a c) (a b c) (a b) (a))
+=======
 > (allsubsets '(a b)) => (nil (a) (b) (a b))
+>>>>>>> 3235b509ecc932fa8b7e6a12af75c730c86df586
 
 |#
 
@@ -176,7 +181,66 @@ Test cases:
     )
 )
 
+
+#| Helper function gen-subsets
+
+The function gen-subsets returns a list of all subsets of the set union of the argument 
+list L, and a list with the atom E as a sole element.
+
+The function gen-subsets is a helper function for allsubsets by serving as an accumulator.
+
+Test cases:
+> 
+
+|#
+
 (defun gen-subsets (L E R AC)
+<<<<<<< HEAD
+    (if (null E)
+        (cons nil nil)
+        (append 
+            AC ; retains nil in the
+            (gen-subsets (cdr L) (car L) (cons E R) nil)
+            (let 
+                ((P (allsubsets (append L R)))) 
+                (append P (multi-append E P))
+            )
+        )
+    )
+)
+
+
+#| Helper function set-cleanup
+
+The function set-cleanup removes duplicate subsets in list X and accumulates non-duplicated
+elements int list argument AC. Subsets are considered to be duplicates or equal 
+if they have the same elements, and the ordering in them do not matter. 
+When initially using set-cleanup, AC should be NIL.
+All the elements in X are lists.
+
+This function is a helper function for allsubsets by removing duplicate subsets
+in the list returned by gen-subsets.
+
+Test cases:
+> (set-cleanup '(nil) nil) => (NIL)
+> (set-cleanup '((A) (A)) nil) => ((A))
+> (set-cleanup '((B A) (A B)) nil) => ((A B))
+> (set-cleanup '((B A C) (A B C) (C A B)) nil) => ((C A B))
+
+|#
+
+(defun set-cleanup (X AC)
+    (cond 
+        ((null X) nil)
+        (
+            (set-contains (car X) (cdr X))
+            (set-cleanup (cdr X) AC)
+        )
+        (
+            t
+            (cons (car X) (set-cleanup (cdr X) AC))
+        )
+=======
     (if
         (null E)
         nil
@@ -187,10 +251,19 @@ Test cases:
                 (multi-append E P)
             ))
         ))
+>>>>>>> 3235b509ecc932fa8b7e6a12af75c730c86df586
     )
 )
 
 
+<<<<<<< HEAD
+#| QUESTION 5 function allsubsets |#
+(defun allsubsets (L)
+    (set-cleanup 
+        (gen-subsets (cdr L) (car L) nil (cons nil nil)) 
+        nil
+    )
+=======
 #| Helper function set-cleanup
 
 The function set-cleanup removes duplicate subsets in list X and accumulates non-duplicated
@@ -221,6 +294,7 @@ Test cases:
 #| QUESTION 5 function allsubsets |#
 (defun allsubsets (L)
     (set-cleanup (gen-subsets (cdr L) (car L) nil (cons nil nil)) nil)
+>>>>>>> 3235b509ecc932fa8b7e6a12af75c730c86df586
 )
 
 
