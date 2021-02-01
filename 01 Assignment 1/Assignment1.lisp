@@ -1,4 +1,4 @@
-#| QUESTION 1
+#| QUESTION 1 function xmember
 
 The function xmember returns T if argument X is a member of the argument list Y. Otherwise, 
 it's NIL. Both the argument X and the list Y may be NIL or lists containing NIL.
@@ -15,7 +15,6 @@ Test cases:
 
 |#
 
-#| QUESTION 1 function xmember |#
 (defun xmember (X Y)
     (cond 
         ((or (null Y) (atom Y)) nil)
@@ -27,7 +26,7 @@ Test cases:
 
 
 
-#| QUESTION 2
+#| QUESTION 2 function flatten
 
 The function flatten returns a list of atoms with the property that all the atoms
 appearing in the argument list X also appear.
@@ -40,7 +39,6 @@ Test cases:
 
 |#
 
-#| QUESTION 2 function flatten |#
 (defun flatten (X)
     (cond
         ((null X) nil)
@@ -58,7 +56,7 @@ Test cases:
 
 
 
-#| QUESTION 3
+#| QUESTION 3 function remove-duplicate
 
 The function remove-duplicate takes the list argument X as a list of atoms and returns 
 a list with the same sequence of atoms with duplicate atoms removed.
@@ -72,7 +70,6 @@ Test cases:
 
 |#
 
-#| QUESTION 3 function remove-duplicate |#
 (defun remove-duplicate (X)
     (cond
         ((null X) nil)
@@ -91,7 +88,7 @@ Test cases:
 
 
 
-#| QUESTION 4
+#| QUESTION 4 function mix
 
 The function mix returns a list that mixes the elements of the list arguments L1 and L2.
 It does so by choosing elements from L1 and L2 alternatingly. If one list is shorter than
@@ -106,7 +103,6 @@ Test cases:
 
 |#
 
-#| QUESTION 4 function mix |#
 (defun mix (L1 L2)
     (cond
         ((null L1) L2)
@@ -124,17 +120,7 @@ Test cases:
 
 
 
-#| QUESTION 5
-
-The function allsubsets returns a list of all subsets of L. No subsets are repeated.
-
-Test cases:
-> (allsubsets nil) => (nil)
-> (allsubsets '(a)) => (nil (a)) 
-> (allsubsets '(a b)) => (nil (b) (a b) (a))
-> (allsubsets '(a b c)) => (nil (c) (b c) (b) (a c) (a b c) (a b) (a))
-
-|#
+#| QUESTION 5 |#
 
 #| Helper function multi-append
 
@@ -201,13 +187,13 @@ Test cases:
             ; the helper function. This explains the deep nesting below.
             (let 
                 ((
-                    P 
+                    P ; powerset
                     (let 
                         ((S (append L R)))
-                        (gen-subsets (cdr S) (car S) nil)
+                        (gen-subsets (cdr S) (car S) nil) ; powerset of set without E
                     )
                 ))
-                (append P (multi-append E P))
+                (append P (multi-append E P)) ; expand powerset with E
             )
         )
     )
@@ -290,6 +276,7 @@ Test cases:
     )
 )
 
+
 #| Helper function set-cleanup
 
 The function set-cleanup removes duplicate subsets in list X and accumulates non-duplicated
@@ -320,7 +307,17 @@ Test cases:
 )
 
 
-#| QUESTION 5 function allsubsets |#
+#| QUESTION 5 function allsubsets
+
+The function allsubsets returns a list of all subsets of L. No subsets are repeated.
+
+Test cases:
+> (allsubsets nil) => (nil)
+> (allsubsets '(a)) => (nil (a)) 
+> (allsubsets '(a b)) => (nil (b) (a b) (a))
+> (allsubsets '(a b c)) => (nil (c) (b c) (b) (a c) (a b c) (a b) (a))
+
+|#
 
 (defun allsubsets (L)
     (set-cleanup
@@ -335,96 +332,182 @@ Test cases:
 
 
 
-#| QUESTION 6
+#| QUESTION 6 |#
 
-The function mix returns a list that mixes the elements of the list arguments L1 and L2.
-It does so by choosing elements from L1 and L2 alternatingly. If one list is shorter than
-the other, then append all remaining elements from the longer list at the end.
+#| Helper function neighbors-helper
 
-Test cases:
-> (mix '(a b c) '(d e f)) => (a b c d e f)
-> (mix '(1 2 3) '(a)) => (1 a 2 3)
-> (mix '((a) (b c)) '(d e f g h)) => ((a) d (b c) e f g h)
-> (mix '(1 2 3) nil) => (1 2 3)
-> (mix '(1 2 3) '(nil)) => (1 nil 2 3)
+This is a helper function for neighbors. The additional list argument AC is an
+accumulator, and should be nil during first use.
 
 |#
-
-#| QUESTION 6 function mix |#
-;QUESTION 6
-;todo: documentation
-;graph: ()
-;strategy: get all websites
-;check if reachable
-
-;assume ((x y)) structure
 (defun neighbors-helper (x L AC)
-    (if (null L)
-        AC
-        (if (eq x (caar L))
-            (neighbors-helper x (cdr L) (cons (cadar L) AC))
-            (neighbors-helper x (cdr L) AC)
-        )
+    (cond
+        ((null L) AC)
+        ((eq x (caar L)) (neighbors-helper x (cdr L) (cons (cadar L) AC)))
+        (t (neighbors-helper x (cdr L) AC))
     )
 )
+
+
+#| Helper function neighbors:
+
+The function neighbors returns a list of websites, from argument list L of pair links, 
+directly reachable from argument x website. This does not filter entries listed twice
+or self-linking websites.
+
+This is a helper function for reached-helper.
+
+Test cases:
+> (neighbors 'google '((google shopify) (google aircanada) (amazon aircanada))) => (AIRCANADA SHOPIFY)
+> (neighbors 'google '((google shopify) (google aircanada) (amazon aircanada) (aircanada delta) (google google))) => (GOOGLE AIRCANADA SHOPIFY) 
+> (neighbors 'google '((google shopify) (shopify amazon) (amazon indigo))) => (SHOPIFY)
+
+|#
 
 (defun neighbors (x L)
     (neighbors-helper x L nil)
 )
-;(neighbors 'google '( (google shopify) (google aircanada) (amazon aircanada)))
-;(neighbors 'google '( (google shopify) (google aircanada) (amazon aircanada) (aircanada delta) (google google) )) 
-;(neighbors 'google '( (google shopify) (shopify amazon) (amazon indigo)  ))
 
-(defun node-union (L R)
-    (append L R)
-)
 
-(defun node-filter-helper (L F AC)
-    (if (null L)
-        AC
-        (if (xmember (car L) F)
-            (node-filter-helper (cdr L) F AC)
-            (node-filter-helper (cdr L) F (cons (car L) AC))
-        )
-    )
-)
+#| Helper function node-filter
+
+The function returns a list of elements in the argument list L that is not already in
+the argument list F.
+
+This is a helper function for reached-helper.
+
+Test cases:
+> (node-filter '(a b c d e f) '(a c)) => (b d e f)
+> (node-filter '(a b c d e f a) '(a c)) => (b d e f)
+
+|#
 
 (defun node-filter (L F)
-    (node-filter-helper L F nil)
+    (cond
+        ((null L) nil)
+        ((xmember (car L) F) (node-filter (cdr L) F))
+        (t (cons (car L) (node-filter (cdr L) F)))
+    )
 )
+
+
+#| Helper function reached-helper
+
+This is a helper function for reached. The additional argument V is an accumulator
+which is a list of all websites already visited. The additional argument Q is an
+accumulator which is a list of all websites that are reachable by previously visited
+websites. Take note that we filter argument list Q using node-filter to prevent
+visiting websites we already visited.
+
+|#
 
 (defun reached-helper (x L V Q)
-    (if (or (null Q) nil)
+    (if (null Q)
         V
-        ; get all neighbors
-        (reached-helper (car Q)
+        (reached-helper 
+            (car Q) ; pop the queue
             L
-            (cons (car Q) V)
-            (node-filter (cons (car Q) (neighbors x L)) V)
+            (cons (car Q) V) ; put the top of the queue to visited
+            (node-filter (append (cdr Q) (neighbors x L)) V) ; remove all visited nodes
         )
     )
 )
+
+
+#| Helper function remove-element
+
+The function returns a list with all the elements in the argument list L, without
+the atomic element x.
+
+Test cases:
+> (remove-element 'a '(a b a c)) => (b c)
+
+|#
+
+(defun remove-element (x L)
+    (cond
+        ((null L) nil)
+        ((eq (car L) x) (remove-element x (cdr L)))
+        (t (cons (car L) (remove-element x (cdr L))))
+    )
+)
+
+
+#| QUESTION 6 function reached
+
+The function returns a list of atoms naming all websites raechable from argument x website
+based on the argument list L which is a list of pairs representing linkage.
+
+Test cases:
+> (reached 'google '((google shopify) (google aircanada) (amazon aircanada))) => (AIRCANADA SHOPIFY)
+> (reached 'google '((google shopify) (shopify amazon) (amazon google))) => (AMAZON SHOPIFY)
+> (reached 'google '((google shopify) (shopify amazon) (amazon indigo))) => (INDIGO AMAZON SHOPIFY)
+> (reached 'google '((google shopify) (google aircanada) (amazon aircanada) (aircanada delta) (google google))) => (DELTA SHOPIFY AIRCANADA)
+
+|#
 
 (defun reached (x L)
-    (remove-duplicate (reached-helper x L nil (cons x nil)))
-)
-; (reached 'google '( (google shopify) (google aircanada) (amazon aircanada)))
-
-
-(defun linkers-helper (x L AC)
-    (if (null L)
-        AC
-        (if (and (not (eq x (caar L))) (eq x (cadar L)))
-            (linkers-helper x (cdr L) (cons (caar L) AC))
-            (linkers-helper x (cdr L) AC)
+    (remove-element X
+        (remove-duplicate 
+            (reached-helper x L nil (cons x nil))
         )
     )
 )
+
+
+#| Helper function linkers-helper
+
+This is a helper function for linkers. It uses an accumulator AC, additionally. AC should be
+nil when initially used. This function also returns duplicates, unlike linkers.
+
+Test cases:
+> (linkers-helper 'aircanada '((google shopify) (aircanada aircanada)) nil) => NIL
+> (linkers-helper 'aircanada '((google shopify) (google aircanada) (amazon aircanada) (google aircanada)) nil) => (GOOGLE AMAZON GOOGLE)
+
+|#
+
+(defun linkers-helper (x L AC)
+    (cond
+        ((null L) AC)
+        (
+            (and (not (eq x (caar L))) (eq x (cadar L)))
+            (linkers-helper x (cdr L) (cons (caar L) AC))
+        )
+        (t (linkers-helper x (cdr L) AC))
+    )
+)
+
+
+#| Helper function linkers
+
+The function linkers returns a list of atoms naming the webpages in pair elements of the 
+argument list L which have a direct link to the argument x webpage.
+
+This is a helper function for rank-individually.
+
+Test cases:
+> (linkers 'aircanada '((google shopify) (aircanada aircanada))) => NIL
+> (linkers 'aircanada '((google shopify) (google aircanada) (amazon aircanada) (google aircanada))) => (AMAZON GOOGLE)
+
+|#
 
 (defun linkers (x L)
     (remove-duplicate (linkers-helper x L nil))
 )
-;; (linkers 'aircanada '( (google shopify) (google aircanada) (amazon aircanada) (google aircanada)))
+
+
+#| Helper function count-elements
+
+The function count-elements returns a numerical value representing the count of elements
+in the argument list L.
+
+This is a helper function for rank-individually.
+
+Test cases:
+> (count-elements '()) => 0
+> (count-elements '(A B C)) => 3
+
+|#
 
 (defun count-elements (L)
     (if (null L)
@@ -433,15 +516,46 @@ Test cases:
     )
 )
 
+
+#| Helper function rank-individually
+
+The function rank-individually returns a list representing (A B), where A is the argument x,
+and B is the count of all references for A in the argument list L, which is a list of pairs
+representing linkage. References to the page are not counted if it references itself, 
+and duplicate references are ignored.
+
+This is a helper function for rank-helper.
+
+Test cases:
+> (rank-individually 'google '( (google shopify) (google aircanada) (amazon aircanada) (aircanada delta) (google google) ))
+> (rank-individually 'shopify '( (google shopify) (google aircanada) (amazon aircanada) (aircanada delta) (google google) ))
+> (rank-individually 'amazon '( (google shopify) (google aircanada) (amazon aircanada) (aircanada delta) (google google) ))
+> (rank-individually 'aircanada '( (google shopify) (google aircanada) (amazon aircanada) (aircanada delta) (google google) ))
+> (rank-individually 'delta '( (google shopify) (google aircanada) (amazon aircanada) (aircanada delta) (google google) ))
+
+|#
 (defun rank-individually (x L)
     (cons x (cons (count-elements (linkers x L)) nil))
 )
-;; (rank-individually 'google '( (google shopify) (google aircanada) (amazon aircanada) (aircanada delta) (google google) ))
-;; (rank-individually 'shopify '( (google shopify) (google aircanada) (amazon aircanada) (aircanada delta) (google google) ))
-;; (rank-individually 'amazon '( (google shopify) (google aircanada) (amazon aircanada) (aircanada delta) (google google) ))
-;; (rank-individually 'aircanada '( (google shopify) (google aircanada) (amazon aircanada) (aircanada delta) (google google) ))
-;; (rank-individually 'delta '( (google shopify) (google aircanada) (amazon aircanada) (aircanada delta) (google google) ))
 
+
+#| Helper function rank-helper
+
+The function rank-helper returns a list of element pairs (X Y) that maps to each element in the 
+list argument S. X is the element in the argument list S, and Y is the count of references
+to the page based the argument list L, which contains pairs representing linkage. 
+References to the page are not counted if it references itself, and duplicate
+references are ignored.
+
+This is a helper function for rank.
+
+Test cases:
+> (rank-helper '(google shopify aircanada amazon) '((google shopify) (google aircanada) (amazon aircanada))) => ((GOOGLE 0) (SHOPIFY 1) (AIRCANADA 2) (AMAZON 0))
+> (rank-helper '(google shopify amazon) '((google shopify) (shopify amazon) (amazon google))) => ((GOOGLE 1) (SHOPIFY 1) (AMAZON 1))
+> (rank-helper '(google shopify amazon indigo) '((google shopify) (shopify amazon) (amazon indigo))) => ((GOOGLE 0) (SHOPIFY 1) (AMAZON 1) (INDIGO 1))
+> (rank-helper '(google shopify aircanada amazon delta) '((google shopify) (google aircanada) (amazon aircanada) (aircanada delta) (google google))) => ((GOOGLE 0) (SHOPIFY 1) (AIRCANADA 2) (AMAZON 0) (DELTA 1))
+
+|#
 (defun rank-helper (S L)
     (if (null S)
         nil
@@ -449,13 +563,56 @@ Test cases:
     )
 )
 
-(defun rank-sorter (L)
-    (sort L 'rank-greater-than)
-)
+
+#| Helper function rank-greater-than
+
+The function rank-greater returns T if the second element of the argument list L1 is less
+than the second element of the argument list L2. Otherwise, it returns nil.
+
+This is used by rank-sorter as an argument.
+
+Test cases:
+> (rank-greater-than '(a 0) '(b 1)) => NIL
+> (rank-greater-than '(a 1) '(b 0)) => T
+
+|#
 
 (defun rank-greater-than (L1 L2)
     (> (cadr L1) (cadr L2))
 )
+
+#| Helper function rank-sorter
+
+The function rank-sorter sorts the elements in L based on the numerical value of their
+second element.
+
+This is a helper function for rank.
+
+Test cases:
+> (rank-sorter '()) => NIL
+> (rank-sorter '((C 1) (B 0) (A 2))) => ((A 2) (C 1) (B 0))
+
+|#
+
+(defun rank-sorter (L)
+    (sort L 'rank-greater-than)
+)
+
+
+#| Helper function rank-flattener
+
+The function rank-flattener returns a list of the first element in each list element within
+the argument list L. It is assumed that each element in L has at least one element.
+
+This is a helper function for rank.
+
+Test cases:
+> (rank-flattener ((aircanada 2) (shopify 1) (google 0) (amazon 0))) => (aircanada shopify google amazon)
+> (rank-flattener ((google 1) (shopify 1) (amazon 1))) => (google shopify amazon)
+> (rank-flattener ((shopify 1) (amazon 1) (indigo 1) (google 0))) => (shopify amazon indigo google)
+> (rank-flattener ((aircanada 2) (shopify 1) (delta 1) (google 0) (amazon 0))) => (aircanada shopify delta google amazon)
+
+|#
 
 (defun rank-flattener (L)
     (if (null L)
@@ -463,9 +620,22 @@ Test cases:
         (cons (caar L) (rank-flattener (cdr L)))
     )
 )
-;; (rank-flattener '((a 0) (b 2) (c 3)))
+
+
+#| QUESTION 6 function rank
+
+The function rank returns a list of atoms naming pages that are in S,
+which are arranged according based on how many pages refer to them, based on argument list L
+containing pairs representing linkage.
+
+Test cases:
+> (rank '(google shopify aircanada amazon) '((google shopify) (google aircanada) (amazon aircanada))) => (AIRCANADA SHOPIFY GOOGLE AMAZON)
+> (rank '(google shopify amazon) '((google shopify) (shopify amazon) (amazon google))) => (GOOGLE SHOPIFY AMAZON)
+> (rank '(google shopify amazon indigo) '((google shopify) (shopify amazon) (amazon indigo))) => (SHOPIFY AMAZON INDIGO GOOGLE)
+> (rank '(google shopify aircanada amazon delta) '((google shopify) (google aircanada) (amazon aircanada) (aircanada delta) (google google))) => (AIRCANADA SHOPIFY DELTA GOOGLE AMAZON)
+
+|#
 
 (defun rank (S L)
     (rank-flattener (rank-sorter (rank-helper S L)))
 )
-;; (rank '(google spotify aircanada ualberta delta) '( (google shopify) (google aircanada) (amazon aircanada) (aircanada delta) (google google) ))
