@@ -136,73 +136,40 @@ Test cases:
 
 |#
 
+#| Helper function multi-append
+
+The function multi-appends returns a list where all elements the argument list S
+has the argument E appended in them. Every element in the argument list S should
+be a list or nil.
+
+If the argument list S is empty, then we return a list which contains a list with
+the argument E as the element.
+
+This is a helper function for gen-subsets.
+
+Test cases:
+> (multi-append 'a '() => ((a))
+> (multi-append 'a '(())) => ((a))
+> (multi-append 'a '(() (b))) => ((a) (a b))
+
+|#
+
 (defun multi-append (E S)
-    (cond ((null S) (cons (cons E nil) nil))
-        ((null (car S)) (multi-append E (cdr S)))
-        (t (cons (cons E (car S))
-            (multi-append E (cdr S))))
-    )
-)
-
-
-
-(defun xset-member (X L)
-    (cond
-        ((null L) nil)
-        ((equal X (car L)) t)
-        (t (xset-member X (cdr L)))
-    )
-)
-
-(defun xset-subset (X L)
-    (cond
-        ((null X) t)
-        ((xset-member (car X) L) (xset-subset (cdr X) L))
-        (t nil)
-    )
-)
-
-
-#| Helper function x
-
-The function set-contains returns T if argument list L contains the subset argument list X.
-Two subsets are equal if both list contains the same elements, even if the orders different.
-All elements in list L is assumed to be a list or nil.
-
-Test cases:
-> (set-contains nil '(nil)) => T
-> (set-contains nil '((A))) => NIL
-> (set-contains '(A) '((A))) => T
-> (set-contains '(A B) '((B A))) => T
-
-|#
-(defun xset-equal (X Y)
-    (if (and (xset-subset X Y) (xset-subset Y X))
-        t
-        nil
-    )
-)
-
-
-#| Helper function set-contains
-
-The function set-contains returns T if argument list L contains the subset argument list X.
-Two subsets are equal if both list contains the same elements, even if the orders different.
-All elements in list L is assumed to be a list or nil.
-
-Test cases:
-> (set-contains nil '(nil)) => T
-> (set-contains nil '((A))) => NIL
-> (set-contains '(A) '((A))) => T
-> (set-contains '(A B) '((B A))) => T
-
-|#
-
-(defun set-contains (X L)
-    (cond
-        ((null L) nil)
-        ((xset-equal X (car L)) t)
-        (t (set-contains X (cdr L)))
+    (cond 
+        (
+            (null S) 
+            (cons (cons E nil) nil))
+        (
+            (null (car S)) 
+            (multi-append E (cdr S))
+        )
+        (
+            t 
+            (cons 
+                (cons E (car S))
+                (multi-append E (cdr S))
+            )
+        )
     )
 )
 
@@ -228,14 +195,100 @@ Test cases:
         (cons nil nil)
         (append 
             (gen-subsets (cdr L) (car L) (cons E R))
+            ; I cannot put the expression below in another helper function
+            ; because it uses gen-subsets. The helper function would be
+            ; dependent on gen-subsets; gen-subsets would be dependent of
+            ; the helper function. This explains the deep nesting below.
             (let 
-                ((P (allsubsets (append L R)))) 
+                ((
+                    P 
+                    (let 
+                        ((S (append L R)))
+                        (gen-subsets (cdr S) (car S) nil)
+                    )
+                ))
                 (append P (multi-append E P))
             )
         )
     )
 )
 
+
+#| Helper function xset-subset
+
+The function xset-subset returns T if set argument list X is a subset of 
+argument list L. Otherwise, it returns nil.
+
+This is a helper function for xset-equal.
+
+Test cases:
+> (xset-subset nil nil) => T
+> (xset-subset nil '(a)) => T
+> (xset-subset '(a) '(a)) => T
+> (xset-subset '(b) '(c a)) => NIL
+> (xset-subset '(a) '(b a)) => T
+> (xset-subset '(a) '(c b a)) => T
+> (xset-subset '(a b) '(c b a)) => T
+
+|#
+
+(defun xset-subset (X L)
+    (cond
+        ((null X) t)
+        ((xmember (car X) L) (xset-subset (cdr X) L))
+        (t nil)
+    )
+)
+
+
+#| Helper function xset-equal
+
+The function xset-equal returns T if the two subsets are equal. Otherwise, it returns nil.
+Otherwise, it returns nil. Two subsets are equal if both list contains the same elements, 
+even if the orders different.
+
+This is a helper function for set-contains.
+
+Test cases:
+> (xset-equal nil nil) => T
+> (xset-equal nil '(a)) => NIL
+> (xset-equal '(a) '(a)) => T
+> (xset-equal nil '(a)) => NIL
+> (xset-equal '(a b) '(b a)) => T
+
+|#
+(defun xset-equal (X Y)
+    (if (and (xset-subset X Y) (xset-subset Y X))
+        t
+        nil
+    )
+)
+
+
+#| Helper function set-contains
+
+The function set-contains returns T if argument list L contains the subset argument list X.
+Otherwise, it returns nil. Two subsets are equal if both list contains the same elements, 
+even if the orders different. All elements in list L is assumed to be a list or nil.
+
+This function is a helper function for set-cleanup by determining whether a subset is
+already in a given set.
+
+Test cases:
+> (set-contains nil '(nil)) => T
+> (set-contains nil '((A))) => NIL
+> (set-contains '(A) '((A))) => T
+> (set-contains '(A B) '((B A))) => T
+
+|#
+
+(defun set-contains (X L)
+    (cond
+        ((null L) nil)
+        ((xset-equal X (car L)) t)
+        (t (set-contains X (cdr L)))
+    )
+)
 
 #| Helper function set-cleanup
 
