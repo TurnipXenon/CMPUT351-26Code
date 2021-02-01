@@ -162,12 +162,41 @@ Test cases:
     )
 )
 
+
+#| Helper function x
+
+The function set-contains returns T if argument list L contains the subset argument list X.
+Two subsets are equal if both list contains the same elements, even if the orders different.
+All elements in list L is assumed to be a list or nil.
+
+Test cases:
+> (set-contains nil '(nil)) => T
+> (set-contains nil '((A))) => NIL
+> (set-contains '(A) '((A))) => T
+> (set-contains '(A B) '((B A))) => T
+
+|#
 (defun xset-equal (X Y)
     (if (and (xset-subset X Y) (xset-subset Y X))
         t
         nil
     )
 )
+
+
+#| Helper function set-contains
+
+The function set-contains returns T if argument list L contains the subset argument list X.
+Two subsets are equal if both list contains the same elements, even if the orders different.
+All elements in list L is assumed to be a list or nil.
+
+Test cases:
+> (set-contains nil '(nil)) => T
+> (set-contains nil '((A))) => NIL
+> (set-contains '(A) '((A))) => T
+> (set-contains '(A B) '((B A))) => T
+
+|#
 
 (defun set-contains (X L)
     (cond
@@ -181,12 +210,16 @@ Test cases:
 #| Helper function gen-subsets
 
 The function gen-subsets returns a list of all subsets of the set union of the argument 
-list L, and a list with the atom E as a sole element.
+list L, and a list with the atom argument E as a sole element. This function produces repeated
+subsets. The argument R is an accumulator and should be nil during the first call.
 
 The function gen-subsets is a helper function for allsubsets by serving as an accumulator.
 
 Test cases:
-> 
+> (gen-subsets '(nil) nil nil) => (nil)
+> (gen-subsets '(nil) 'a nil) => (nil nil (a))
+> (gen-subsets '(b) 'a nil) => (nil nil (a) (b a) (b) nil (b) (a b) (a))
+> (gen-subsets '(b c) 'a nil) => (nil nil (a) (b a) (b) (c a) (c b a) (c b) (c) nil (a) (c a) (c) (b a) (b c a) (b c) (b) nil (c) (b c) (b) (a c) (a b c) (a b) (a))
 
 |#
 
