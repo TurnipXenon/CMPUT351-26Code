@@ -95,7 +95,7 @@ It does so by choosing elements from L1 and L2 alternatingly. If one list is sho
 the other, then append all remaining elements from the longer list at the end.
 
 Test cases:
-> (mix '(a b c) '(d e f)) => (a b c d e f)
+> (mix '(a b c) '(d e f)) => (a d b e c f)
 > (mix '(1 2 3) '(a)) => (1 a 2 3)
 > (mix '((a) (b c)) '(d e f g h)) => ((a) d (b c) e f g h)
 > (mix '(1 2 3) nil) => (1 2 3)
