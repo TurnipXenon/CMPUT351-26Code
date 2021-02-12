@@ -1,3 +1,8 @@
+#| Reference:
+- Some of the code descriptions are paraphrased from the assignment descriptions.
+
+|#
+
 #| QUESTION 1 function xmember
 
 The function xmember returns T if argument X is a member of the argument list Y. Otherwise, 
