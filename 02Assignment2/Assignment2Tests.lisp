@@ -39,31 +39,17 @@
 
 
 ; (greater (x y) = (if (> x y) x (if (< x y) y nil)))
-; User-defined
+; User-defined basic = 4
 (set 'ut1 '(fl-interp '(greater 3 5) '((greater (x y) = (if (> x y) x (if (< x y) y nil)))))) ; > '5
+(set 'ut2 '(fl-interp '(square 4) '((square (x) = (* x x))))) ; > '16
+(set 'ut3 '(fl-interp '(simpleinterest 4 2 5) '((simpleinterest (x y z) = (* x (* y z)))))) ; > '40
+(set 'ut4 '(fl-interp '(xor t nil) '((xor (x y) = (if (equal x y) nil t))))) ; > 't
+(set 'ut5 '(fl-interp '(cadr (5 1 2 7)) '((cadr(x) = (first (rest x)))))) ; > '1
 
-;; (lambda (x) (if (> x y) x (if (< x y) y nil)))
-;; (lambda (y) (lambda (x) (if (> x y) x (if (< x y) y nil))))
-;; (((lambda (x) (lambda (y) (if (> x y) x (if (< x y) y nil)))) 3) 5)
-;; (((lambda (x)
-;;     (lambda (y) (if (< x y) x y))
-;; )5)6)
-
-;; ((
-;;     lambda (x)
-;;     (lambda (y) (if (< x y) x y))
-;; ) 5 6)
-
-;; (funcall
-;;     (funcall
-;;         (function
-;;             (lambda (x)
-;;                 (function 
-;;                     (lambda (y)
-;;                         (if (< x y) x y)
-;;                     )
-;;                 )
-;;             )
-;;         )
-;;     4)
-;; 9)
+; More complex = 6 total
+(set 'ut6 '(fl-interp '(last (s u p)) '((last(x) = (if (null (rest x)) (first x) (last (rest x))))))) ; > 'p
+(set 'ut7 '(fl-interp '(push (1 2 3) 4) '((push (x y) = (if (null x) (cons y nil) (cons (first x) (push (rest x) y))))))) ; > '(1 2 3 4)
+(set 'ut8 '(fl-interp '(pop (1 2 3)) '((pop(x) = (if (atom (rest (rest x))) (cons (first x) nil) (cons (first x)(pop (rest x)))))))) ; > '(1 2)
+(set 'ut9 '(fl-interp '(power 4 2) '((power(x y) = (if (= y 1) x (power (* x x) (- y 1))))))) ; > '16
+(set 'ut10 '(fl-interp '(factorial 4) '((factorial(x) = (if (= x 1) 1 (* x (factorial (- x 1)))))))) ; > '24
+(set 'ut11 '(fl-interp '(divide 24 4) '((divide (x y) = (div x y 0)) (div (x y z) = (if (> (* y z) x) (- z 1) (div x y (+ z 1))))))) ; > '6

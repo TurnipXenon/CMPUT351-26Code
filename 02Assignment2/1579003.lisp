@@ -67,6 +67,10 @@ Test cases:
 
 |#
 
+(defun datafy (X)
+  (cons 'quote (cons X nil))
+)
+
 ;; (defun replace (A V E)
 ;;   A
 ;; )
@@ -75,7 +79,11 @@ Test cases:
 (defun replace0 (A V X)
   (cond
     ((null A) X)
-    ((eq (car A) X) (car V))
+    (
+      (eq (car A) X) 
+      (car V)
+      ;; (cons 'quote (cons (car V) nil))
+    )
     (t (replace0 (cdr A) (cdr V) X))
   )
 )
@@ -89,7 +97,7 @@ This is a helper function for find-fun.
 
 Test cases:
 > (fl-sub (X Y) (3 5) (if (> x y) x (if (< x y) y nil))) > (if (> 3 5) 3 (if (< 3 5) 5 nil))
-
+> (fl-sub )
 |#
 
 (defun fl-sub (A V E)
@@ -244,16 +252,18 @@ Test cases:
           ; todo: error handling
           (
             (find-fun E P)
-            ;; t
             ; reference: https://stackoverflow.com/a/5959697/10024566
-            (eval 
-              (fl-sub
-                (cadar P)
-                (mapcar (lambda (x) (fl-interp x P)) (cdr E))
-                (third (cdar P))
+            (let
+              ((FE (find-fun E P))) ; function expression???
+              (fl-interp 
+                (fl-sub
+                  (second FE)
+                  (mapcar (lambda (x) (fl-interp x P)) (cdr E))
+                  (fourth FE)
+                )
+                P
               )
             )
-            ;; (fl-interp (cons '> (cdr E)) P)
           )
 
           (t E)
@@ -266,3 +276,11 @@ Test cases:
 ;; (fl-interp (cons '> (cdr '(greater 3 5))) nil)
 ;; (mapcar 'fl-interp '((1 nil) (2 nil) (3 nil)))
 ;; (mapcar (lambda (x) (fl-interp x nil)) '(1 2 3))
+
+(defun last0 (X)
+  (if
+    (null (rest X))
+    (first X)
+    (last0 (rest X))
+  )
+)
