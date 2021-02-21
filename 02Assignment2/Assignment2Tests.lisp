@@ -53,3 +53,8 @@
 (set 'ut9 '(fl-interp '(power 4 2) '((power(x y) = (if (= y 1) x (power (* x x) (- y 1))))))) ; > '16
 (set 'ut10 '(fl-interp '(factorial 4) '((factorial(x) = (if (= x 1) 1 (* x (factorial (- x 1)))))))) ; > '24
 (set 'ut11 '(fl-interp '(divide 24 4) '((divide (x y) = (div x y 0)) (div (x y z) = (if (> (* y z) x) (- z 1) (div x y (+ z 1))))))) ; > '6
+(set 'ut12 '(fl-interp '(divide 24 4) '((divide (x y) = (divine x y 0)) (div (x y z) = (if (> (* y z) x) (- z 1) (div x y (+ z 1))))))) ; > '6
+
+; self testing
+(set 'st1 '(fl-interp '(f0 1 2) '((f0 () = 0) (f0 (A) = 1) (f0 (A B) = 2) (f0 (A B C) = 3))))
+(set 'st2 '(fl-interp '(f0) '((f0 () = 0) (f0 (A) = 1) (f0 (A B) = 2) (f0 (A B C) = 3))))

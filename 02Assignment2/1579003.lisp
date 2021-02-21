@@ -101,14 +101,21 @@ Test cases:
 |#
 
 (defun fl-sub (A V E)
-  (if (null E)
-    nil
-    (cons
-      (if (atom (car E))
-        (replace0 A V (car E))
-        (fl-sub A V (car E))
+  (cond 
+    ((null E) nil)
+    (
+      (atom E)
+      (replace0 A V E)
+    )
+    (
+      t
+      (cons
+        (if (atom (car E))
+          (replace0 A V (car E))
+          (fl-sub A V (car E))
+        )
+        (fl-sub A V (cdr E)) ; move to next element but also replace deep
       )
-      (fl-sub A V (cdr E)) ; move to next element but also replace deep
     )
   )
 )
