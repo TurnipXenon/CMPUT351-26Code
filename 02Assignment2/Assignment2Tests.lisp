@@ -58,3 +58,9 @@
 ; self testing
 (set 'st1 '(fl-interp '(f0 1 2) '((f0 () = 0) (f0 (A) = 1) (f0 (A B) = 2) (f0 (A B C) = 3))))
 (set 'st2 '(fl-interp '(f0) '((f0 () = 0) (f0 (A) = 1) (f0 (A B) = 2) (f0 (A B C) = 3))))
+(set 'st3 '(fl-interp '(count (a b c)) '((count (X) = (if (null X) 0 (+ (count (rest X)) 1))))))
+(set 'st4 '(fl-interp '(+ (a b) 5) '((count (X) = (if (null X) 0 (+ (count (rest X)) 1))))))
+(set 'st5 '(fl-interp '(+ (count (1 2 3)) 5) '((count (X) = (if (null X) 0 (+ (count (rest X)) 1))))))
+(set 'st6 '(fl-interp '(f0 5) '((f0 (X) = 5) (f1 () = f1))))
+(set 'st7 '(fl-interp '(f0 f1) '((f0 (X) = 5) (f1 () = f1))))
+(set 'st8 '(fl-interp '(f (g 0)) '((f (X) = 5) (g (X) = (cons X (g (+ 1 X)))))))
