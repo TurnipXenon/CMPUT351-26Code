@@ -1,0 +1,82 @@
+=======================
+Question 1
+
+Normal order reduction
+(Lxy | xx(yy)) (Lx | xy)(Lx | x)
+=> (Lx | xy)(Lx | xy)((Lx | x)(Lx | x))
+=> (Lx | xy)y((Lx | x)(Lx | x))
+=> yy((Lx | x)(Lx | x))
+=> yy((Lx | x))
+
+Applicative order reduction
+(Lxy | xx(yy)) (Lx | xy)(Lx | x)
+=> (Lx | xy)(Lx | xy)((Lx | x)(Lx | x))
+=> (Lx | xy)(Lx | xy)((Lx | x))
+=> (Lx | xy)((Lx | x))y
+=> ((Lx | x))yy
+
+=======================
+Question 2
+
+(a)
+IMP = (Lxy | OR NOT x y)
+IMP = (Lxy | (Lxy | xTy) (Lx | xFT) x y)
+IMP = (Lxy | (Lxy | x (Lxy | x) y) (Lx | x (Lxy| y) (Lxy | x)) x y)
+IMP = (Lxy | (Lxy | x y) (Lx | x (Lxy| y) (Lxy | x)) x y)
+IMP = (Lxy | (Lx | x (Lxy| y) (Lxy | x)) x y)
+IMP = (Lxy | x (Lxy| y) (Lxy | x) x y)
+IMP = (Lxy | x x y)
+
+IMP = (Lxy | OR (NOT x)y)
+IMP = (Lxy | (Lxy | xTy) ((Lx | xFT) x)y)
+IMP = (Lxy | (Lxy | x(Lxy | x)y) ((Lx | x(Lxy | y)(Lxy | x)) x)y)
+IMP = (Lxy | (Lxy | x(Lxy | x)y) (x(Lxy | y)(Lxy | x))y)
+IMP = (Lxy | (x(Lxy | y)(Lxy | x)) (Lxy | x)y)
+
+(b)
+IMP TF = ((Lxy | x) (Lxy | y)(Lxy | x)) (Lxy | x)(Lxy | y)
+IMP TF = (Lxy | y) (Lxy | x)(Lxy | y)
+IMP TF = (Lxy | y)
+IMP TF = F
+
+IMP FT = ((Lxy | y)(Lxy | y)(Lxy | x)) (Lxy | x)(Lxy | x)
+IMP FT = (Lxy | x) (Lxy | x)(Lxy | x)
+IMP FT = (Lxy | x)
+IMP FT = T
+
+=======================
+Question 3
+
+(((L(x y) (L(z) (if (> x y) (+ x z) (+ x y)))) 4 5) 10)
+
+What is the result of evaluating this expression?
+
+let e = (((L(x y) (L(z) (if (> x y) (+ x z) (+ x y)))) 4 5) 10) in CT0
+evaluate e
+    let e = (e1 10) where e1 = ((L(x y) (L(z) (if (> x y) (+ x z) (+ x y)))) 4 5)
+    evaluate 10 => 10
+    evaluate e1 in CT0
+        let e1 = (e2 4 5) where e2 = (L(x y) (L(z) (if (> x y) (+ x z) (+ x y))))
+        evaluate 4 => 4
+        evaluate 5 => 5
+        evaluate e2 in CT0
+            let e2 = (L(x y) e3) where e3 = (L(z) (if (> x y) (+ x z) (+ x y)))
+        e2 => [e2, CT0]
+        ---
+        let CT1 = {x -> 4, y -> 5} U CT0
+        evaluate e3 in CT1
+    e1 => [e3, CT1]
+    ---
+    let CT2 = {z -> 10} U CT1
+    evaluate e3 in CT2
+        let e3 = (L(z) e4) where e4 = (if (> x y) (+ x z) (+ x y))
+    e3 => [e3, CT2]
+    evaluate e4 in CT2
+        evaluate (> x y) in CT2 => (> 4 5) => F
+        since F, evaluate (+ x y) in CT2 => (+ 4 5) => 9
+    e4 => 9
+e => 9
+
+The result is 9.
+
+The last context is {z -> 10, x -> 4, y -> 5} U CT0.

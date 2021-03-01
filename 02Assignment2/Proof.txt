@@ -1,0 +1,24 @@
+Q2
+
+T = (lambda xy | x)
+F = (lambda xy | y)
+
+IMP F T = T
+IMP F T = ((lambda xy | y)(lambda xy | y)(lambda xy | x)) (lambda xy | x)(lambda xy | x)
+IMP F T = (lambda xy | x) (lambda xy | x)(lambda xy | x)
+IMP F T = (lambda xy | x)
+
+IMP T F = F
+IMP T F = ((lambda xy | x) (lambda xy | y)(lambda xy | x)) (lambda xy | x)(lambda xy | y)
+IMP T F = (lambda xy | y) (lambda xy | x)(lambda xy | y)
+IMP T F = (lambda xy | y)
+
+IMP T T = T
+IMP T T = ((lambda xy | x)(lambda xy | y)(lambda xy | x)) (lambda xy | x)(lambda xy | x)
+IMP T T = (lambda xy | y) (lambda xy | x)(lambda xy | x)
+IMP T T = (lambda xy | x)
+
+IMP F F = T
+IMP F F = ((lambda xy | y)(lambda xy | y)(lambda xy | x)) (lambda xy | x)(lambda xy | y)
+IMP F F = (lambda xy | x) (lambda xy | x)(lambda xy | y)
+IMP F F = (lambda xy | x)
