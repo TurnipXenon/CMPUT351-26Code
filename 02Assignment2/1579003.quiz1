@@ -19,19 +19,18 @@ Applicative order reduction
 Question 2
 
 (a)
-IMP = (Lxy | OR NOT x y)
-IMP = (Lxy | (Lxy | xTy) (Lx | xFT) x y)
-IMP = (Lxy | (Lxy | x (Lxy | x) y) (Lx | x (Lxy| y) (Lxy | x)) x y)
-IMP = (Lxy | (Lxy | x y) (Lx | x (Lxy| y) (Lxy | x)) x y)
-IMP = (Lxy | (Lx | x (Lxy| y) (Lxy | x)) x y)
-IMP = (Lxy | x (Lxy| y) (Lxy | x) x y)
-IMP = (Lxy | x x y)
-
 IMP = (Lxy | OR (NOT x)y)
 IMP = (Lxy | (Lxy | xTy) ((Lx | xFT) x)y)
 IMP = (Lxy | (Lxy | x(Lxy | x)y) ((Lx | x(Lxy | y)(Lxy | x)) x)y)
 IMP = (Lxy | (Lxy | x(Lxy | x)y) (x(Lxy | y)(Lxy | x))y)
-IMP = (Lxy | (x(Lxy | y)(Lxy | x)) (Lxy | x)y)
+IMP = (Lxy | (x (Lxy | y)(Lxy | x)) (Lxy | x)y)
+
+IMP = (Lxy | x N M)
+IMP = (Lxy | xyT)
+
+IMP TF = (Lxy | xyT) TF => TFT => F
+IMP FT = (Lxy | xyT) Ft => FFT => T
+IMP TT = (Lxy | xyT) Ft => TTT => T
 
 (b)
 IMP TF = ((Lxy | x) (Lxy | y)(Lxy | x)) (Lxy | x)(Lxy | y)
@@ -39,7 +38,7 @@ IMP TF = (Lxy | y) (Lxy | x)(Lxy | y)
 IMP TF = (Lxy | y)
 IMP TF = F
 
-IMP FT = ((Lxy | y)(Lxy | y)(Lxy | x)) (Lxy | x)(Lxy | x)
+IMP FT = ((Lxy | y) (Lxy | y)(Lxy | x)) (Lxy | x)(Lxy | x)
 IMP FT = (Lxy | x) (Lxy | x)(Lxy | x)
 IMP FT = (Lxy | x)
 IMP FT = T
@@ -79,4 +78,4 @@ e => 9
 
 The result is 9.
 
-The last context is {z -> 10, x -> 4, y -> 5} U CT0.
+The last context is CT2 = {z -> 10, x -> 4, y -> 5} U CT0.
