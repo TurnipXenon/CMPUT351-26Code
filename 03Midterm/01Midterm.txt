@@ -1,0 +1,112 @@
+* Becareful quotes like (first (a b c)) => results to ERROR
+* (equal '(a) '(a.nil)) => T
+* Accumulating does not lead to reduced number of recursive function calls
+* A function cannot be reduced by beta-reduction
+* The result of an application can be a function
+* We start with that context, but then we extend it, and the evaluation of the body 
+    takes place in the extended context.
+* Before we apply a function, the context always needs to be extended
+* In the interpreter, a context is represented as a name and value list
+* If AOR reduces a lambda expression to a normal form, then NOR will always 
+    find the same normal form
+
+
+(P1)
+(1a)
+(a(b.c)(d.e))
+
+(P2)
+(2a)
+
+(i) True
+
+(ii) False
+Counterexample
+f (x) = (+ x 5)
+g (x) = 6
+
+g(f(2))
+
+In AOR:
+g((+ 6 5))
+g(11)
+6
+
+In NOR:
+6
+
+(iii) False
+Counterexample:
+(Ly | (Lx|y(xx)) (Lx|y(xx))) a
+(Lx|a(xx)) (Lx|a(xx))
+a ((Lx|a(xx)) (Lx|a(xx)))
+a (a ((Lx|a(xx)) (Lx|a(xx))))
+... does not end
+
+(iv) True
+
+(2b)
+(Lxy | xxy) ((Lx | xa) (Lx | xb))
+(Lxy | xxy) ((Lx | xb)a)
+(Lxy | xxy) (ab)
+(Ly | (ab)(ab)y)
+
+(2c)
+OP = (Lxy | x N M)
+OP = (Lxy | x (NOT y) M) # if x is true, y has to be false to get true
+OP = (Lxy | x (NOT y) y) # if x is false, y has to be true to get true
+OP = (Lxy | x ((Lx | xFT) y) y)
+OP = (Lxy | x(yFT)y)
+
+OP T T = (Lxy | x(yFT)y) TT
+OP T T = T(TFT)T
+OP T T = TFT
+OP T T = F
+
+OP T F = (Lxy | x(yFT)y) TF
+OP T T = T(FFT)F
+OP T T = FFT
+OP T T = T
+
+(P3)
+(3a)
+CT0 = {z -> 2}
+((lambda (f x) (f (f x))) (lambda (u) (* z u)) 5) in CT0
+5 in CT0 =>
+(lambda (u) (* z u)) in CT0 => [(* z u), CT0]
+(lambda (f x) (f (f x))) in CT1 = {f -> [(* z u), CT0], x -> 5} U CT0 => [(f (f x)), CT1]
+((* z u) ((* z u) 5)) in {u -> 5} U CT1
+((* z u) (* 2 5))
+((* z u) 10)
+(* 2 10)
+20
+
+(3a.i)
+CT1 = {f -> [(* z u), CT0], x -> 5} U CT0
+
+(3aii)
+CT2 = {u -> 5} U CT1
+
+(3a.iii)
+First call:
+CT2 = {u -> 5} U CT1
+
+Second call:
+CT3 = {u -> 10} U CT2
+
+(3a.iv)
+20
+
+(3b)
+(lambda (x y) ((lambda (z) (+ x y z)) 6))
+(
+    LDF 
+    (
+        NIL LDC 6 CONS LDF
+        (
+            NIL LDC (1.1) LDC (2.2) LDC (2.1) + + RTN
+        )
+        AP
+    )
+    AP
+)
