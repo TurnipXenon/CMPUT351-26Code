@@ -3,7 +3,7 @@
 % setIntersect(+S1, +S2, -S3): set intersect S1 and S2 to get S3
 
 setIntersect([], _, []).
-setIntersect([A|L], R, [A|S]) :- !, isIn(A,R), setIntersect(L, R, S).
+setIntersect([A|L], R, [A|S]) :- isIn(A,R), !, setIntersect(L, R, S).
 setIntersect([_|L], R, S) :- setIntersect(L, R, S).
 
 
@@ -22,7 +22,7 @@ isIn(A, [_|L]) :- isIn(A, L).
 % If the number of elements in L is odd, then the last elements is left as is
 
 swap([], []).
-swap([A], [A]).
+swap([A], [A]) :- !. % prevent additional queries when odd length list
 swap([A,B|L], [B,A|R]) :- swap(L, R).
 
 
@@ -73,7 +73,7 @@ xCountAll([X|L], REF, [[X,XN]|L1]) :- countOccurence(X, REF, XN),
 % countOccurence(+X, +L, -N): where X is an atom; L is a list; and N is the number of times
 % that X has appeared in L
 
-countOccurence(_, [], 0).
+countOccurence(_, [], 0) :- !. % needed to prevent further queries
 countOccurence(X, [X|L], XN) :- !, countOccurence(X, L, XN0), XN is XN0 + 1.
 countOccurence(X, [_|L], XN) :- countOccurence(X, L, XN).
 
@@ -85,7 +85,7 @@ pairSort([], []) :- !. % make it all stop here
 pairSort(L, [Min|L1]) :- xFindMinPair(L, Min),  excludePair(Min, L, Rem), pairSort(Rem, L1).
 
 
-% xFindMinPair(+L, -Min): where L is a list of pairs [a, n]; Min is the last occurence
+% xFindMinPair(+L, -Min): where L is a list of pairs [a, n]; Min is the first occurence
 % of the minimum n, in pairs [a, n]
 
 xFindMinPair([], []) :- false.
@@ -94,9 +94,10 @@ xFindMinPair([A|L], MIN) :- xFindMinPair(L, CAND), getMinPair(A, CAND, MIN).
 
 
 % getMinPair(+A, +B, -Min): where both A and B are [a,n] pairs, and Min is the smaller pair
-% [a,n] from A and B based on their n. If both A and B are equal, Min is B.
+% [a,n] from A and B based on their n. If both A and B are equal, Min is A. This
+% gives preference to the first occurence
 
-getMinPair([A, AN], [_, BN], [A, AN]) :- AN < BN, !.
+getMinPair([A, AN], [_, BN], [A, AN]) :- AN =< BN, !.
 getMinPair(_, X, X).
 
 
@@ -163,17 +164,6 @@ isConnectedToAll(A, [B|L]) :- isConnected(A, B), isConnectedToAll(A, L).
 
 isConnected(A, B) :- edge(A, B), !.
 isConnected(A, B) :- edge(B, A).
-
-
-% NOTE: Starting definitions for a graph to prevent warning
-
-node(a).
-node(b).
-node(c).
-
-edge(a,b).
-edge(b,c).
-edge(c,a).
 
 
 
