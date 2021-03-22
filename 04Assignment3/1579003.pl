@@ -57,17 +57,27 @@ doOperation(_, _, _) :- false.
 % countAll(+L, -N): where L is a flat list of atoms; N is a list of pairs [a,n]
 % representing that atom a occurs in L n times. The pairs in N appear in an increasing order
 
-countAll(L, N) :- xCountAll(L, L, N0), pairSort(N0, N).
+countAll(L, N) :- xCountAll(L, L, [], N0), pairSort(N0, N).
+
+countAll2(L, N) :- xCountAll(L, L, [], N).
+
+% isIn(+X, +L): where X is an atom, and L is a list of pairs of atom, returns
+% true if there's a pair [X, _] in L, otherwise false
+isIn2(_, []) :- false.
+isIn2(X, [[X,_]|_]) :- !.
+isIn2(X, [_|L]) :- isIn2(X, L).
 
 
-% xCountAll(+L, +Ref, -N): where L is a flat list of atoms; Ref is a flat list of atoms;
-% N is a list of pairs [a,n] representing that atom a occurs in Ref n times. An atom in L
-% will only be counted when it is the final atom of its kind left
+% xCountAll(+L, +Ref, +Acc, -N): where L is a flat list of atoms; Ref is a flat list of atoms;
+% Acc is an accumulator of the list of pairs [a,n]; and N is a list of pairs [a,n]
+% representing that atom a occurs in Ref n times. An atom in L will only be 
+% counted when it is the final atom of its kind left
 
-xCountAll([], _, []).
-xCountAll([X|L], REF, L1) :- isIn(X, L), !, xCountAll(L, REF, L1).
-xCountAll([X|L], REF, [[X,XN]|L1]) :- countOccurence(X, REF, XN), 
-                                      xCountAll(L, REF, L1).
+xCountAll([], _, Acc, Acc).
+xCountAll([X|L], Ref, Acc, N) :- isIn2(X, Acc), !, xCountAll(L, Ref, Acc, N).
+xCountAll([X|L], Ref, Acc, N) :- countOccurence(X, Ref, XN),
+                                 append(Acc, [[X,XN]], Acc2),
+                                 xCountAll(L, Ref, Acc2,  N).
 
 
 % countOccurence(+X, +L, -N): where X is an atom; L is a list; and N is the number of times
