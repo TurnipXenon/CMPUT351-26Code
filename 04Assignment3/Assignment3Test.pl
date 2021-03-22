@@ -43,7 +43,6 @@ test(filter) :- filter([3,4,[5,2],[1,7,3]],lessThan,3,W), W = [2,1].
 % Q4
 
 test(countAll) :- countAll([a,b,e,c,c,b],N), N = [[a,1],[e,1],[b,2],[c,2]].
-% okay!!
 
 
 
