@@ -75,7 +75,7 @@ diff(A, [B|L]) :-
 
 % Multiset = [-1, 1, 2, 3, 7,9,-2, -4], Sum = 18, length(Multiset, Len), length(Subset, Len), assign_domain(Subset, Multiset), get_subset_sum(Subset, SubsetSum), SubsetSum #= Sum.
 
-subsetsum(Multiset, Sum) :-
+subsetsum(Multiset, Sum, Subset) :-
    length(Multiset, Len),
    length(Subset, Len),
    assign_domain(Subset, Multiset),
@@ -83,7 +83,6 @@ subsetsum(Multiset, Sum) :-
    SubsetSum #= Sum,
    !,
    labeling([ff], Subset),
-   is_multiset_subset(Subset, Multiset),
    !.
    % !.%,
    % label(Subset).
@@ -99,9 +98,8 @@ get_subset_sum([A|L], Sum) :-
 
 
 assign_domain([], _).
-assign_domain([A|Subset], Domain) :-
-   get_domain_union(Domain, FdDomain),
-   A in FdDomain,
+assign_domain([A|Subset], [B|Domain]) :-
+   A in 0\/B,
    assign_domain(Subset, Domain).
 
 
