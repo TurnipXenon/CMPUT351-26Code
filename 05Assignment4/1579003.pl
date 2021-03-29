@@ -99,9 +99,11 @@ assign_domain([A|Subset], [B|Domain]) :-
    assign_domain(Subset, Domain).
 
 
-get_domain_union([], 0).
-get_domain_union([El|Domain], FdDomain) :-
-   get_domain_union(Domain, FdDomain1),
+getDomainUnion([El|[]], FdDomain) :-
+   !,
+   fd_dom(El, FdDomain).
+getDomainUnion([El|Domain], FdDomain) :-
+   getDomainUnion(Domain, FdDomain1),
    B in El\/FdDomain1,
    fd_dom(B, FdDomain).
 
@@ -145,13 +147,16 @@ assign(W1,W2,WI1,WI2) :-
    length(W2, Len),
    length(WI2, Len),
    % add the constraints
-   assignDomain4(WI1, WI2, Len),
-   noSelfReview(WI1, WI2, 1),
    expertyReview(WI1, WI2, 1),
-   paperHasTwoReviewers(),
-   considerMaxLoad().
-   % ,
-   % retractData().
+   noSelfReview(WI1, WI2, 1),
+   paperHasTwoReviewers(WI1, WI2),
+   considerMaxLoad(),
+   !,
+   labeling([ff], WI1),
+   labeling([ff], WI2),
+   assignRealNames(W1, WI1),
+   assignRealNames(W2, WI2),
+   retractData().
    
 
 identifyTopic([], _).
@@ -194,12 +199,6 @@ topicToId(T, TI) :-
    !.
 topicToId(_, 0).
 
-assignDomain4([], _, _).
-assignDomain4([W1|L1], [W2|L2], Len) :-
-   W1 in 1..Len,
-   W2 in 1..Len,
-   assignDomain4(L1, L2, Len).
-
 noSelfReview([], _, _).
 noSelfReview([W1|L1], [W2|L2], Id) :-
    paperId(Id, R1, R2, _),
@@ -214,13 +213,32 @@ expertyReview([], _, _).
 expertyReview([W1|L1], [W2|L2], Id) :-
    paperId(Id, _, _, T),
    findall(R, (reviewerDataId(R, T, _); reviewerDataId(R, _, T)), RL),
+   getDomainUnion(RL, RD),
+   W1 in RD,
+   W2 in RD,
    Id1 is Id + 1,
    expertyReview(L1, L2, Id1).
 
-paperHasTwoReviewers().
+assignDomain4(_, _, []).
+assignDomain4(W1, W2, [T|L]) :-
+   W1 in T,
+   W2 in T,
+   assignDomain4(W1, W2, L).
+
+paperHasTwoReviewers([], _).
+paperHasTwoReviewers([W1|L1], [W2|L2]) :-
+   W1 #\= W2,
+   paperHasTwoReviewers(L1, L2).
 
 % todo
 considerMaxLoad().
+
+%todo
+assignRealNames([], _).
+assignRealNames([W|WL], [I|IL]) :-
+   reviewerId(I, R),
+   W = R,
+   assignRealNames(WL, IL).
 
 % definePaperNumber([], _, _).
 % definePaperNumber([P|Papers], Reviewers, Topics) :-
