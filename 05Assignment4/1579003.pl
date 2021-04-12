@@ -1,5 +1,18 @@
 %*****************************************************************************************
 % Question 1
+% 5 examples of removal of domain values:
+% In row 1, column 1,
+% (1) 1 is removed from the domain because 1 is already in the same box
+% (2) 2 is removed from the domain because 2 is already in the same row
+% (3) 3 is removed from the domain because 3 is already in the same box
+% (4) 6 is removed from the domain because 6 is already in the same row
+% (5) 7 is removed from the domain because 7 is already in the same column
+% 1 example of domain values that cannot be removed by AC-3
+% In row 1, column 1,
+% {4, 9} cannot be removed from the domain, because neither 4 nor 9 are in the same box,
+% same column, or same row. Assuming we did AC-3 on every tile in Example 2, row-1-column-1
+% still has no 4's nor 9's in the same box, same column, or same row in the image shown
+% in the website where it shows the AC-3 output.
 
 
 
@@ -79,8 +92,9 @@ subsetsum(Multiset, Sum) :-
    length(Multiset, Len),
    length(Subset, Len),
    assign_domain(Subset, Multiset),
-   get_subset_sum(Subset, SubsetSum),
-   SubsetSum #= Sum,
+   sum(Subset, #=, Sum),
+   % get_subset_sum(Subset, SubsetSum),
+   % SubsetSum #= Sum,
    !,
    label(Subset),
    print(Subset),
@@ -107,10 +121,6 @@ getDomainUnion([El|Domain], FdDomain) :-
    B in El\/FdDomain1,
    fd_dom(B, FdDomain).
 
-% xSubsetsum([], _, _).
-% xSubsetsum([A|Subset], Multiset, Sum) :-
-%    xSubsetsum(Subset, Multiset1, Sum).
-
 is_multiset_subset([], _).
 is_multiset_subset([0|Subset], Multiset) :-
    !,
@@ -135,7 +145,6 @@ assign(W1,W2) :-
    findall(P, paper(P, _, _, _), Papers),
    findall(A, (reviewer(A, _, _)), Reviewers),
    findall(T, paper(_, _, _, T), Topics),
-   retractData(),
    % digitize the atoms
    identifyTopic(Topics, 1),
    identifyReviewers(Reviewers, 1),
@@ -149,7 +158,7 @@ assign(W1,W2) :-
    length(WI2, Len),
    append(WI1, WI2, WI3),
    % add the constraints
-   expertyReview(WI1, WI2, 1),
+   % expertyReview(WI1, 1),
    noSelfReview(WI1, WI2, 1),
    paperHasTwoReviewers(WI1, WI2),
    considerMaxLoad(WI3, MaxLoad),
@@ -157,7 +166,8 @@ assign(W1,W2) :-
    labeling([ff], WI1),
    labeling([ff], WI2),
    assignRealNames(W1, WI1),
-   assignRealNames(W2, WI2).
+   assignRealNames(W2, WI2),
+   retractData().
 
 identifyTopic([], _).
 identifyTopic([T|Topics], Id) :-
@@ -218,17 +228,14 @@ noSelfReview([W1|L1], [W2|L2], Id) :-
 
 paperId(-1, _, _, _) :- false. % prevent warning
 
-expertyReview([], _, _).
-expertyReview([W1|L1], [W2|L2], Id) :-
+expertyReview([], _).
+expertyReview([W1|L1], Id) :-
    paperId(Id, _, _, T),
    findall(R, (reviewerDataId(R, T, _); reviewerDataId(R, _, T)), RL),
    getDomainUnion(RL, RD),
    W1 in RD,
-   W2 in RD,
    Id1 is Id + 1,
-   expertyReview(L1, L2, Id1).
-
-reviewerDataId(_, _, _) :- false. % prevent warning
+   expertyReview(L1, Id1).
 
 assignDomain4(_, _, []).
 assignDomain4(W1, W2, [T|L]) :-
@@ -241,7 +248,6 @@ paperHasTwoReviewers([W1|L1], [W2|L2]) :-
    W1 #\= W2,
    paperHasTwoReviewers(L1, L2).
 
-% todo: over here
 considerMaxLoad([], _).
 considerMaxLoad([R|L], LoadMax) :-
    count(R, L, C),
@@ -313,5 +319,6 @@ reviewer(kris,theory,games).
 reviewer(ken,database,games).
 reviewer(bill,database,ai).
 reviewer(jim,theory,games).
+
 
 workLoadAtMost(2).
