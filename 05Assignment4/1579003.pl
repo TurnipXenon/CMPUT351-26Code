@@ -163,9 +163,9 @@ assign(W1,W2, WI1, WI2) :-
    nonExpertReview(WI2, 1),
    noSelfReview(WI1, WI2, 1),
    paperHasTwoReviewers(WI1, WI2),
+   considerMaxLoad(WI3, MaxLoad),
    !,
    label(WI3),
-   considerMaxLoad(WI3, MaxLoad),
    assignRealNames(W1, WI1),
    assignRealNames(W2, WI2).
 
@@ -193,11 +193,11 @@ reviewerDataId(_, _, _) :- false.
 
 retractData() :-
    topicId(_, _),
+   !,
    retractall(topicId(_, _)),
    retractall(reviewerId(_, _)),
    retractall(reviewerDataId(_, _, _)),
    retractall(paperId(_, _, _, _)).
-
 retractData().
 
 digitizePaper([]).
@@ -268,6 +268,22 @@ paperHasTwoReviewers([], _).
 paperHasTwoReviewers([W1|L1], [W2|L2]) :-
    W1 #\= W2,
    paperHasTwoReviewers(L1, L2).
+
+createPairs([], _, _).
+createPairs([R|L], MaxLoad, [P|LP]) :-
+   createPairs(L, MaxLoad, LP),
+   D in 0..MaxLoad,
+   P = R-D.
+
+% # Vs = [_,_,_,_], M in 0..3, N in 0..3, global_cardinality(Vs, [1-M,2-N]), label(Vs).
+considerMaxLoad(Reviewers, MaxLoad) :-
+   findall(R, reviewerDataId(R, _, _), RL),
+   print(Reviewers),
+   print(RL),
+   createPairs(RL, MaxLoad, Pairs),
+   print(Pairs),
+   global_cardinality(Reviewers, Pairs).
+
 
 considerMaxLoad([], _).
 considerMaxLoad([R|L], LoadMax) :-
