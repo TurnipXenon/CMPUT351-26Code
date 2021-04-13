@@ -96,7 +96,6 @@ subsetsum(Multiset, Sum) :-
    sum(Subset, #=, Sum),
    !,
    label(Subset),
-   print(Subset),
    !.
 
 
@@ -141,25 +140,25 @@ assign(W1,W2) :-
    append(WI1, WI2, WI3),
    % add the constraints
    experty_review(WI1, 1),
-   nonExpertReview(WI2),
-   noSelfReview(WI1, WI2, 1),
+   experty_review(WI2, 1),
+   no_self_review(WI1, WI2, 1),
    paper_has_two_reviewers(WI1, WI2),
    !,
    label(WI3),
    consider_max_load(WI3, MaxLoad),
-   assignRealNames(W1, WI1),
-   assignRealNames(W2, WI2).
+   assign_real_names(W1, WI1),
+   assign_real_names(W2, WI2).
 
 
 % digitize_topic(+T, +Id): digitize or assign IDs to the textual topics
 
 digitize_topic([], _).
 digitize_topic([T|Topics], Id) :-
-   assert(topicId(Id, T)),
+   assert(topic_id(Id, T)),
    Id1 is Id + 1,
    digitize_topic(Topics, Id1).
 
-topicId(_, _) :- false. % prevent warnings
+topic_id(_, _) :- false. % prevent warnings
 
 
 % digitize_reviewers(+R, Id): digitize or assign IDs to the textual name of the reviewers
@@ -169,25 +168,25 @@ digitize_reviewers([R|Reviewers], Id) :-
    reviewer(R, T1, T2),
    topic_to_id(T1, TI1),
    topic_to_id(T2, TI2),
-   assert(reviewerId(Id, R)),
-   assert(reviewerDataId(Id, TI1, TI2)),
+   assert(reviewer_id(Id, R)),
+   assert(reviewer_data_id(Id, TI1, TI2)),
    Id1 is Id + 1,
    digitize_reviewers(Reviewers, Id1).
 
-reviewerId(_, _) :- false. % prevent warnings
+reviewer_id(_, _) :- false. % prevent warnings
 
 
 % retract_data(): remove all digitized IDs
 
 retract_data() :-
-   topicId(_, _),
-   retractall(topicId(_, _)),
-   reviewerId(_, _),
-   retractall(reviewerId(_, _)),
-   reviewerDataId(_, _, _),
-   retractall(reviewerDataId(_, _, _)),
-   reviewerDataId(_, _, _)
-   retractall(paperId(_, _, _, _)),
+   topic_id(_, _),
+   retractall(topic_id(_, _)),
+   reviewer_id(_, _),
+   retractall(reviewer_id(_, _)),
+   reviewer_data_id(_, _, _),
+   retractall(reviewer_data_id(_, _, _)),
+   reviewer_data_id(_, _, _),
+   retractall(paper_id(_, _, _, _)),
    !.
 
 retract_data().
@@ -201,7 +200,7 @@ digitize_paper([P|Papers]) :-
    reviewer_to_id(R1, RI1),
    reviewer_to_id(R2, RI2),
    topic_to_id(T, TI),
-   assert(paperId(P, RI1, RI2, TI)),
+   assert(paper_id(P, RI1, RI2, TI)),
    digitize_paper(Papers).
 
 
@@ -209,7 +208,7 @@ digitize_paper([P|Papers]) :-
 % are not declared using reviewer(Reviewer, _, _)
 
 reviewer_to_id(R, RI) :-
-   reviewerId(RI, R),
+   reviewer_id(RI, R),
    !.
 reviewer_to_id(_, 0). % non-registered reviewer 
 
@@ -218,7 +217,7 @@ reviewer_to_id(_, 0). % non-registered reviewer
 % are not declared using paper(_, _, _, Topic)
 
 topic_to_id(T, TI) :-
-   topicId(TI, T),
+   topic_id(TI, T),
    !.
 topic_to_id(_, 0).
 
@@ -226,17 +225,17 @@ topic_to_id(_, 0).
 % no_self_review(+R1, +R2, +Id): assigns a constraint on each i-th variable in R1 and R2
 % so that they are not assigned to writer of the i-th paper
 
-noSelfReview([], _, _).
-noSelfReview([W1|L1], [W2|L2], Id) :-
-   paperId(Id, R1, R2, _),
+no_self_review([], _, _).
+no_self_review([W1|L1], [W2|L2], Id) :-
+   paper_id(Id, R1, R2, _),
    W1 #\= R1,
    W1 #\= R2,
    W2 #\= R1,
    W2 #\= R2,
    Id1 is Id + 1,
-   noSelfReview(L1, L2, Id1).
+   no_self_review(L1, L2, Id1).
 
-paperId(-1, _, _, _) :- false. % prevent warning
+paper_id(-1, _, _, _) :- false. % prevent warning
 
 
 % get_domain_union(+List_To_Domain, -Domain): turns a non-empty list into a clpfd domain
@@ -255,24 +254,14 @@ get_domain_union([El|Domain], FdDomain) :-
 
 experty_review([], _).
 experty_review([W1|L1], Id) :-
-   paperId(Id, _, _, T),
-   findall(R, (reviewerDataId(R, T, _); reviewerDataId(R, _, T)), RL),
+   paper_id(Id, _, _, T),
+   findall(R, (reviewer_data_id(R, T, _); reviewer_data_id(R, _, T)), RL),
    get_domain_union(RL, RD),
    W1 in RD,
    Id1 is Id + 1,
    experty_review(L1,Id1).
 
-
-% non_experty_review(+Reviewers): assigns a constraint on each reviewer in Reviewers so
-% that their domain is all the reviewers
-
-nonExpertReview([]).
-nonExpertReview(W1) :-
-   findall(R, reviewerDataId(R, _, _), RL),
-   get_domain_union(RL, RD),
-   W1 ins RD.
-
-reviewerDataId(_, _, _) :- false. % prevent warning
+reviewer_data_id(_, _, _) :- false. % prevent warning
 
 
 % paper_has_two_reviewers(+Reviewers1, +Reviewers2): adds a constraint so that the i-th
@@ -310,8 +299,8 @@ count(X, [_|L], N) :-
 % textual name of the reviewer on the i-th element in Reviewers based on the i-th element
 % in ReviewerIds
 
-assignRealNames([], _).
-assignRealNames([W|WL], [I|IL]) :-
-   reviewerId(I, R),
+assign_real_names([], _).
+assign_real_names([W|WL], [I|IL]) :-
+   reviewer_id(I, R),
    W = R,
-   assignRealNames(WL, IL).
+   assign_real_names(WL, IL).
